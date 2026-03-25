@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>DevDiary | Akıllı Not Defteri</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .note-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: #fafafa; }
+        .analysis { background: #e8f5e9; padding: 10px; margin-top: 10px; border-left: 4px solid #4caf50; font-style: italic; font-size: 0.9em; }
+        textarea, input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background: #2196f3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1976d2; }
+        .analyze-btn { background: #ff9800; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📓 DevDiary - Notlarım</h2>
+
+    <div style="background: #eee; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <input type="text" id="title" placeholder="Not Başlığı...">
+        <textarea id="content" rows="3" placeholder="Not içeriği..."></textarea>
+        <select id="mode">
+            <option value="ozet">Özet Modu</option>
+            <option value="detay">Teknik Analiz</option>
+        </select>
+        <button onclick="addNote()">Notu Kaydet</button>
+    </div>
+
+    <div id="notes-list">
+        </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000/notes";
+
+    // Notları Listele
+    async function loadNotes() {
+        const response = await fetch(API_URL + "/");
+        const notes = await response.json();
+        const list = document.getElementById('notes-list');
+        list.innerHTML = "";
+
+        notes.forEach(note => {
+            const div = document.createElement('div');
+            div.className = 'note-card';
+            div.innerHTML = `
+                <strong>${note.title}</strong> [Mod: ${note.mode}]
+                <p>${note.content}</p>
+                ${note.analysis ? `<div class="analysis"><strong>Llama Analizi:</strong><br>${note.analysis}</div>` :
+                `<button class="analyze-btn" onclick="analyzeNote(${note.id})">AI ile Analiz Et</button>`}
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    // Yeni Not Ekle
+    async function addNote() {
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        const mode = document.getElementById('mode').value;
+
+        await fetch(API_URL + "/", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ title, content, mode })
+        });
+        loadNotes();
+    }
+
+    // AI Analizi Başlat
+    async function analyzeNote(id) {
+        const btn = event.target;
+        btn.innerText = "Llama Düşünüyor...";
+        btn.disabled = true;
+
+        await fetch(`${API_URL}/${id}/analyze`, { method: 'POST' });
+        loadNotes();
+    }
+
+    loadNotes(); // Sayfa açılınca notları getir
+</script>
+</body>
+</html>uv
