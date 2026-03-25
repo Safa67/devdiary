@@ -4,7 +4,6 @@ from _datetime import datetime
 
 from routers import notes
 
-
 def generate_weekly_report():
     db = SessionLocal()
     notes = db.query(models.Note).all()
