@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-# 1. Temel Şema (Ortak Alanlar)
+# 1. Temel Şema 
 class NoteBase(BaseModel):
     title: str
     content: str
